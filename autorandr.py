@@ -1285,7 +1285,7 @@ def dispatch_call_to_sessions(argv):
             else:
                 os.execl(autorandr_binary, autorandr_binary, *argv[1:])
             sys.exit(1)
-        os.waitpid(child_pid, 0)
+        return os.waitpid(child_pid, 0)
 
     # The following line assumes that user accounts start at 1000 and that no
     # one works using the root or another system account. This is rather
@@ -1344,8 +1344,9 @@ def dispatch_call_to_sessions(argv):
                 # User has no pwd entry
                 continue
 
-            fork_child_autorandr(pwent, process_environ)
-            X11_displays_done.add(display)
+            ret = fork_child_autorandr(pwent, process_environ)
+            if ret == 0:
+                X11_displays_done.add(display)
 
     # Run autorandr for any users/displays which didn't have a process with
     # XAUTHORITY set.
@@ -1357,8 +1358,9 @@ def dispatch_call_to_sessions(argv):
                 # User has no pwd entry
                 continue
 
-            fork_child_autorandr(pwent, process_environ)
-            X11_displays_done.add(display)
+            ret = fork_child_autorandr(pwent, process_environ)
+            if ret == 0:
+                X11_displays_done.add(display)
 
 
 def enabled_monitors(config):
